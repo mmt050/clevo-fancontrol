@@ -16,10 +16,10 @@ This allows it to reach some impressive benchmark scores (1280/7800 Geekbench) b
 
 Enter https://github.com/FlyGoat/RyzenAdj/wiki/Renoir-Tuning-Guide#skin-temp-limit, which allows to set target TDP, burst-TDP, and maximum tctl-temp. With some tinkering I am satisfied to have applied the following:
 ```shell
-/usr/bin/ryzenadj  --slow-limit=9000 --fast-limit=13000 --tctl-temp 70
+/usr/bin/ryzenadj  --slow-limit=9000 --fast-limit=13000 --tctl-temp 80
 ```
 
-Which gives me a completely silent laptop about 95% of the time, while preserving 95% of stock the single-core, and 70% of the stock multi-core performance. If you're not willing to leave 30% multi-core performance on the table, you can up the --slow-limit (controlling the sustained performance), and also up the --fast-limit (controlling the burst), and up the tctl-temp to 90 (heat transfer is more efficient the higher the temp. difference). This will take you much closer to 100% mutli-core performance all the while your laptop will be silent when you're reading or coding.
+Which gives me a completely silent laptop about 95% of the time, while preserving 100% of stock single-core, and 75-80% of the stock multi-core performance. If you're not willing to leave 25% multi-core performance on the table, you can up the --slow-limit (controlling the sustained performance), and also up the --fast-limit (controlling the burst), and up the tctl-temp to 90 (heat transfer is more efficient the higher the temp. difference). This will take you much closer to 100% mutli-core performance all the while your laptop will be silent when you're reading or coding.
 
 
 Clevo Fan Control Indicator for Ubuntu
