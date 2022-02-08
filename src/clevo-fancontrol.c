@@ -231,8 +231,9 @@ static int main_ec_worker(void) {
         // auto EC
         if (share_info->auto_duty == 1) {
             int next_duty = ec_auto_duty_adjust();     
+            // printf("auto-eval=%d%\n", next_duty);
 
-            if (next_duty != -1 && next_duty != share_info->auto_duty_val) {
+            if ((next_duty != -1 && next_duty != share_info->auto_duty_val) || (next_duty == 0 && share_info->fan_duty !=0))   {
                 char s_time[256];
                 get_time_string(s_time, 256, "%m/%d %H:%M:%S");
                 printf("%s CPU=%d°C, GPU=%d°C, auto fan duty to %d%%\n", s_time,
@@ -360,7 +361,8 @@ static int ec_auto_duty_adjust(void) {
     else if (temp >= 55 && duty < 16)
         new_duty = 16;
     
-    else if (temp <= 50 && duty > 0)
+    // else if (temp <= 50 && duty > 0)
+    else if (temp <= 50)
         new_duty = 0;
     else if (temp <= 60 && duty >= 16)
         new_duty = 16;
