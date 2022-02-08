@@ -7,7 +7,19 @@ and only use this to translate to the EmbeddedController by clevo, which the ori
 
 The built-in curve setting works great with Ryzen 5700U S76 Pangolin (pang11). My need is to have a setpoint of 60deg, and turn off the fans below 50deg. 
 
-The 5700U is a 8-core CPU, and S76 have configured it with generous 25w (with 30w burst) TDP limit on AC power. This allows it to reach some impressive benchmark scores but it also means it needs lots of cooling. My purpose was to have a mostly silent laptop and I was willing to leave some multi-core performance on the table to achieve this. Enter https://github.com/FlyGoat/RyzenAdj/wiki/Renoir-Tuning-Guide#skin-temp-limit, which allows to set target TDP, burst-TDP, and maximum tctl-temp.  
+Taming the 5700U, 8-core CPU with shitty stock Clevo fan/cooler
+===============================================================
+
+The 5700U is a 8-core CPU, and S76 have configured it with generous 25w (with 30w burst) TDP limit on AC power, and 18W limit on battery.
+
+This allows it to reach some impressive benchmark scores (1280/7800 Geekbench) but it also means it needs lots of cooling. Cooling that the stock fan+sink combo can only provide at high RPM.  My purpose was to have a mostly silent laptop and I was willing to trade some multi-core performance to achieve it. 
+
+Enter https://github.com/FlyGoat/RyzenAdj/wiki/Renoir-Tuning-Guide#skin-temp-limit, which allows to set target TDP, burst-TDP, and maximum tctl-temp. With some tinkering I am satisfied to have applied the following:
+```shell
+/usr/bin/ryzenadj  --slow-limit=9000 --fast-limit=13000 --tctl-temp 80
+```
+
+Which gives me a completely silent laptop about 95% of the time, while preserving 100% of stock single-core, and 75-80% of the stock multi-core performance. If you're not willing to leave 25% multi-core performance on the table, you can up the --slow-limit (controlling the sustained performance), and also up the --fast-limit (controlling the burst), and up the tctl-temp to 90 (heat transfer is more efficient the higher the temp. difference). This will take you much closer to 100% mutli-core performance all the while your laptop will be silent when you're reading or coding.
 
 
 Clevo Fan Control Indicator for Ubuntu
@@ -65,19 +77,6 @@ SyslogIdentifier=clevo-fancontrol
 [Install]
 WantedBy=graphical.target
 
-```
-
-UDEV Rules
-----------
-
-The following two rules can be placed in two files in /etc/udev/rules.d/
-
-```shell
-SUBSYSTEM=="power_supply",ENV{POWER_SUPPLY_ONLINE}=="1",RUN+="/usr/bin/systemctl start ryzenadj"
-```
-
-```shell
-SUBSYSTEM=="power_supply",ENV{POWER_SUPPLY_ONLINE}=="0",RUN+="/usr/bin/systemctl start ryzenadj"
 ```
 
 
