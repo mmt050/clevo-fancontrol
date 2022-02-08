@@ -7,8 +7,8 @@ and only use this to translate to the EmbeddedController by clevo, which the ori
 
 The built-in curve setting works great with Ryzen 5700U S76 Pangolin (pang11). My need is to have a setpoint of 60deg, and turn off the fans below 50deg. 
 
-Taming the 8-core CPU with shitty Clevo fan/cooler
-===========================================
+Taming the 5700U, 8-core CPU with shitty Clevo fan/cooler
+=========================================================
 
 The 5700U is a 8-core CPU, and S76 have configured it with generous 25w (with 30w burst) TDP limit on AC power, and 18W limit on battery.
 
