@@ -8,13 +8,11 @@ DSTDIR := /usr/local
 OBJDIR := obj
 SRCDIR := src
 
-SRC = clevo-indicator.c
+SRC = clevo-fancontrol.c
 OBJ = $(patsubst %.c,$(OBJDIR)/%.o,$(SRC)) 
 
-TARGET = bin/clevo-indicator
+TARGET = bin/clevo-fancontrol
 
-CFLAGS += `pkg-config --cflags appindicator3-0.1`
-LDFLAGS += `pkg-config --libs appindicator3-0.1`
 
 all: $(TARGET)
 

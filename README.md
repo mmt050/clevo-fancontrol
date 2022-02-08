@@ -1,3 +1,13 @@
+Clevo & System76 Fan Controller 
+===============================
+
+This was scrubbed from gtk and graphical dependencies (see https://github.com/SkyLandTW/clevo-indicator for the original) in order
+to be usable as a CLI tool and/or system service. This further allows me to write a more sophisticated PID-controller thermal algo in higher language
+and only use this to translate to the EmbeddedController by clevo, which AqD <iiiaqd@gmail.com> already handled.
+
+
+
+
 Clevo Fan Control Indicator for Ubuntu
 ======================================
 
@@ -16,8 +26,7 @@ Build and Install
 -----------------
 
 ```shell
-sudo apt-get install libappindicator3-dev libgtk-3-dev
-git clone https://github.com/SkyLandTW/clevo-indicator.git
+git clone https://github.com/mmt050/clevo-fancontrol.git
 cd clevo-indicator
 make install
 ```
@@ -25,14 +34,6 @@ make install
 
 Notes
 -----
-
-The executable has setuid flag on, but must be run by the current desktop user,
-because only the desktop user is allowed to display a desktop indicator in
-Ubuntu, while a non-root user is not allowed to control Clevo EC by low-level
-IO ports. The setuid=root creates a special situation in which this program can
-fork itself and run under two users (one for desktop/indicator and the other
-for EC control), so you could see two processes in ps, and killing either one
-of them would immediately terminate the other.
 
 Be careful not to use any other program accessing the EC by low-level IO
 syscalls (inb/outb) at the same time - I don't know what might happen, since
