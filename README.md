@@ -67,17 +67,4 @@ WantedBy=graphical.target
 
 ```
 
-UDEV Rules
-----------
-
-The following two rules can be placed in two files in /etc/udev/rules.d/
-
-```shell
-SUBSYSTEM=="power_supply",ENV{POWER_SUPPLY_ONLINE}=="1",RUN+="/usr/bin/systemctl start ryzenadj"
-```
-
-```shell
-SUBSYSTEM=="power_supply",ENV{POWER_SUPPLY_ONLINE}=="0",RUN+="/usr/bin/systemctl start ryzenadj"
-```
-
 
