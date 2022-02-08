@@ -43,3 +43,50 @@ before other actions can be performed... The program also attempts to prevent
 abortion while issuing commands by catching all termination signals except
 SIGKILL - don't kill the indicator by "kill -9" unless absolutely necessary.
 
+SystemD Service
+---------------
+
+You can use a service similar to the below, placed in /etc/systemd/system/
+
+Note the targets, which make sure the 
+
+```shell
+[Unit]
+Description=Clevo-Fancontrol
+After=network.target
+StartLimitIntervalSec=0
+After=network-target.service
+Wants=network-target.service
+
+[Service]
+Type=idle
+User=root
+Group=root
+Restart=always
+RestartSec=2
+User=root
+ExecStart=/usr/bin/clevo-fancontrol -1
+
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=clevo-fancontrol
+
+[Install]
+WantedBy=graphical.target
+
+```
+
+UDEV Rules
+----------
+
+The following two rules can be placed in two files in /etc/udev/rules.d/
+
+```shell
+SUBSYSTEM=="power_supply",ENV{POWER_SUPPLY_ONLINE}=="1",RUN+="/usr/bin/systemctl start ryzenadj"
+```
+
+```shell
+SUBSYSTEM=="power_supply",ENV{POWER_SUPPLY_ONLINE}=="0",RUN+="/usr/bin/systemctl start ryzenadj"
+```
+
+

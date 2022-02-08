@@ -327,14 +327,16 @@ static int identify_duty(int duty) {
         const int SIZE = 7;
         float ACCURACY = 0.1; // 10% 
         int default_duty = 30;
-        int allowed_duties[7] = {0, 15, 30, 40, 65, 90, 100};
+        int allowed_duties[7] = {0, 16, 30, 40, 65, 90, 100};
         for (int i = 0; i < SIZE; i++) {
             if (eq_fuzzy_range(duty, allowed_duties[i], 1) == 1)
                 return allowed_duties[i];
 
         }
-        printf("could not idenfity duty input(%d), returning defualt=%d%\n", duty, default_duty);
-        return default_duty;
+        // printf("could not idenfity duty input(%d), returning default=%d%\n", duty, default_duty);
+        // printf("could not idenfity duty returning raw input(%d)\n", duty);
+        // return default_duty;
+        return duty;
 }
 
 
@@ -342,93 +344,42 @@ static int ec_auto_duty_adjust(void) {
     int temp = MAX(share_info->cpu_temp, share_info->gpu_temp);
     // int duty = share_info->fan_duty;
     int duty = identify_duty(share_info->fan_duty);
-    printf("ec_auto_duty_adjust: temp=%dc, real_dury=%d, identifie_duty=%d%\n", temp, share_info->fan_duty, duty);
+    // printf("ec_auto_duty_adjust: temp=%dc, real_dury=%d, identifie_duty=%d%\n", temp, share_info->fan_duty, duty);
 
-
+    int new_duty = -1;
     if (temp >= 90) 
-        return 100; 
-    if (temp >= 87.5 && duty < 90)
-        return 90;
-    if (temp >= 85 && duty < 65)
-        return 65; 
-    if (temp >= 75 && duty < 40)
-        return 40; 
-    if (temp >= 65 && duty < 30)
-        return 30;
-    if (temp >= 55 && duty < 16)
-        return 16;
+        new_duty = 100; 
+    else if (temp >= 87.5 && duty < 90)
+        new_duty = 90;
+    else if (temp >= 85 && duty < 65)
+        new_duty = 65; 
+    else if (temp >= 75 && duty < 40)
+        new_duty = 40; 
+    else if (temp >= 65 && duty < 30)
+        new_duty = 30;
+    else if (temp >= 55 && duty < 16)
+        new_duty = 16;
     
-    if (temp <= 50 && duty > 0)
-        return 0;
-    if (temp <= 60 && duty >= 30)
-        return 16;
-    if (temp <= 70 && duty >= 40)
-        return 30;
-    if (temp <= 80 && duty >= 65)
-        return 40;
-    if (temp <= 85 && duty >=90)
-        return 65;
+    else if (temp <= 50 && duty > 0)
+        new_duty = 0;
+    else if (temp <= 60 && duty >= 16)
+        new_duty = 16;
+    else if (temp <= 70 && duty >= 30)
+        new_duty = 30;
+    else if (temp <= 80 && duty >= 40)
+        new_duty = 40;
+    else if (temp <= 85 && duty >=65)
+        new_duty = 65;
 
+    if (new_duty > share_info->fan_duty) {
+        int new_duty_adj = duty + (int)((new_duty - share_info->fan_duty)/2);
+        if ((new_duty - new_duty_adj) > 2) {
+            printf("using adjusted new duty=%d%\n", new_duty_adj);
+            new_duty = new_duty_adj;
+        }
+    }
 
-    /*if (temp >= 90) 
-        return 100; 
-    if (temp >= 87.5 && less_fuzzy(duty, 90, 0.10))
-        return 90;
-    if (temp >= 85 && less_fuzzy(duty, 65, 0.10))
-        return 65; 
-    if (temp >= 75 && less_fuzzy(duty, 40, 0.10))
-        return 40; 
-    if (temp >= 65 && less_fuzzy(duty, 30, 0.10))
-        return 30;
-    if (temp >= 55 && less_fuzzy(duty, 15, 0.10))
-        return 15;
-    
-    if (temp <= 50 && more_fuzzy(duty, 0, 0.10))
-        return 0;
-    if (temp <= 60 && more_fuzzy(duty, 30, 0.10))
-        return 15;
-    if (temp <= 70 && more_fuzzy(duty, 40, 0.10))
-        return 30;
-    if (temp <= 80 && more_fuzzy(duty, 65, 0.10))
-        return 40;
-    if (temp <= 85 && more_fuzzy(duty, 90, 0.10))
-        return 65;*/
-
-
-    // //
-    // if (temp >= 80 && duty < 100)
-    //     return 100;
-    // if (temp >= 70 && duty < 90)
-    //     return 90;
-    // if (temp >= 60 && duty < 80)
-    //     return 80;
-    // if (temp >= 50 && duty < 70)
-    //     return 70;
-    // if (temp >= 40 && duty < 60)
-    //     return 60;
-    // if (temp >= 30 && duty < 50)
-    //     return 50;
-    // if (temp >= 20 && duty < 40)
-    //     return 40;
-    // if (temp >= 10 && duty < 30)
-    //     return 30;
-    // //
-    // if (temp <= 15 && duty > 30)
-    //     return 30;
-    // if (temp <= 25 && duty > 40)
-    //     return 40;
-    // if (temp <= 35 && duty > 50)
-    //     return 50;
-    // if (temp <= 45 && duty > 60)
-    //     return 60;
-    // if (temp <= 55 && duty > 70)
-    //     return 70;
-    // if (temp <= 65 && duty > 80)
-    //     return 80;
-    // if (temp <= 75 && duty > 90)
-    //     return 90;
-    //
-    return -1;
+    return new_duty;
 }
 
 static int ec_query_cpu_temp(void) {
