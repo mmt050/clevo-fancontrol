@@ -1,26 +1,17 @@
 Clevo & System76 Fan Controller 
 ===============================
 
-This was scrubbed from gtk and graphical dependencies (see https://github.com/SkyLandTW/clevo-indicator for the original) in order
-to be usable as a CLI tool and/or system service. This further allows me to write a more sophisticated PID-controller thermal algo in higher language
-and only use this to translate to the EmbeddedController by clevo, which AqD <iiiaqd@gmail.com> already handled.
+This was forked from https://github.com/SkyLandTW/clevo-indicator and scrubbed from gtk and graphical dependencies in order
+to be usable as a CLI tool and/or systemd service. This further allows me to write a more sophisticated PID-controller thermal algo in higher language (like python)
+and only use this to translate to the EmbeddedController by clevo, which the original project already handled.
 
+The built-in curve setting works great with Ryzen 5700U S76 Pangolin (pang11). My need is to have a setpoint of 60deg, and turn off the fans below 50deg. 
 
+The 5700U is a 8-core CPU, and S76 have configured it with generous 25w (with 30w burst) TDP limit on AC power. This allows it to reach some impressive benchmark scores but it also means it needs lots of cooling. My purpose was to have a mostly silent laptop and I was willing to leave some multi-core performance on the table to achieve this. Enter https://github.com/FlyGoat/RyzenAdj/wiki/Renoir-Tuning-Guide#skin-temp-limit, which allows to set target TDP, burst-TDP, and maximum tctl-temp.  
 
 
 Clevo Fan Control Indicator for Ubuntu
 ======================================
-
-This program is an Ubuntu indicator to control the fan of Clevo laptops, using reversed-engineering port information from ECView.
-
-It shows the CPU temperature on the left and the GPU temperature on the right, and a menu for manual control.
-
-![Clevo Indicator Screen](http://i.imgur.com/ucwWxLq.png)
-
-
-
-For command-line, use *-h* to display help, or a number representing percentage of fan duty to control the fan (from 40% to 100%).
-
 
 Build and Install
 -----------------
