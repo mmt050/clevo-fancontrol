@@ -1,3 +1,6 @@
 bin/
 obj/
+src-py/.idea
 *.token
+.pyc
+__pycache__

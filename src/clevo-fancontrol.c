@@ -263,7 +263,7 @@ static void main_on_sigterm(int signum) {
 
 static int main_dump_fan(void) {
     printf("{\n");
-    printf("  \"duty\": %d%%,\n", ec_query_fan_duty());
+    printf("  \"duty\": %d,\n", ec_query_fan_duty());
     printf("  \"rpms\": %d,\n", ec_query_fan_rpms());
     printf("  \"cpu_temp_cels\": %d,\n", ec_query_cpu_temp());
     printf("  \"gpu_temp_cels\": %d\n", ec_query_gpu_temp());
@@ -340,6 +340,29 @@ static int identify_duty(int duty) {
         return duty;
 }
 
+static int get_fan_speed(int temp) {
+    /* Fitted qubic poly for curve :
+       50c -> 0%
+       60c -> 16%
+       70c -> 30%
+       80c -> 60%
+       90c -> 80%
+       95c -> 100%
+    */
+    int coef =10000;
+    double t = temp;
+    double a = (2.3268); // pre-coef-ed
+    double b = (-296.758); // pre-coef-ed
+    double c = 2.70371;
+    double d = -89.6658;
+
+
+    double result = (a*pow(t, 3)/coef) + (b*pow(t, 2))/coef + c*t+d;
+    if (result > 100) {
+        return 100;
+    }
+    return round(result);
+}
 
 static int ec_auto_duty_adjust(void) {
     int temp = MAX(share_info->cpu_temp, share_info->gpu_temp);
@@ -347,31 +370,47 @@ static int ec_auto_duty_adjust(void) {
     int duty = identify_duty(share_info->fan_duty);
     // printf("ec_auto_duty_adjust: temp=%dc, real_dury=%d, identifie_duty=%d%\n", temp, share_info->fan_duty, duty);
 
+
+    // Poly:
+    /*int new_duty = get_fan_speed(temp);
+
+    if (duty > 0 && temp <= 60) {
+        new_duty = 16;
+    }
+
+    if (duty > 0 && temp <= 50) {
+        new_duty = 0;
+    }*/
+   
+    // Hysterisis:
+
     int new_duty = -1;
-    if (temp >= 90) 
+    /*if (temp >= 90) 
         new_duty = 100; 
     else if (temp >= 87.5 && duty < 90)
         new_duty = 90;
-    else if (temp >= 85 && duty < 65)
+    else*/ 
+        if (temp >= 85 && duty < 65)
         new_duty = 65; 
     else if (temp >= 75 && duty < 40)
         new_duty = 40; 
     else if (temp >= 65 && duty < 30)
         new_duty = 30;
-    else if (temp >= 55 && duty < 16)
-        new_duty = 16;
+    else if (temp >= 55 && duty < 17)
+        new_duty = 17;
     
     // else if (temp <= 50 && duty > 0)
     else if (temp <= 50)
         new_duty = 0;
-    else if (temp <= 60 && duty >= 16)
-        new_duty = 16;
+    else if (temp <= 60 && duty >= 17)
+        new_duty = 17;
     else if (temp <= 70 && duty >= 30)
         new_duty = 30;
     else if (temp <= 80 && duty >= 40)
         new_duty = 40;
     else if (temp <= 85 && duty >=65)
         new_duty = 65;
+    
 
     if (new_duty > share_info->fan_duty) {
         int new_duty_adj = duty + (int)((new_duty - share_info->fan_duty)/2);
