@@ -95,6 +95,8 @@ typedef enum {
     NA = 0, AUTO = 1, MANUAL = 2
 } MenuItemType;
 
+static int help_requested(int argc, char* argv[] );
+static void print_usage( void );
 static void main_init_share(void);
 static int main_ec_worker(void);
 
@@ -144,10 +146,55 @@ int main(int argc, char* argv[]) {
     if (argc <= 1) {
         return main_dump_fan();
     } else {
-        if (argv[1][0] == '--') {
-            printf(
-                    "\n\
-Usage: clevo-fancontrol [fan-duty-percentage|-1]\n\
+        if (help_requested(argc, argv)) {
+            print_usage();
+            return main_dump_fan();
+        } else {
+            int val;
+            if ( sscanf(argv[1], "%d", &val) != 1 ) {
+                print_usage();
+                return main_dump_fan();
+            }
+            if (val == -1) {
+                signal_term(&ec_on_sigterm);
+                main_init_share();
+                return main_ec_worker();
+            } else if (val < 0 || val > 100)
+            {
+                printf("invalid fan duty %d!\n", val);
+                return EXIT_FAILURE;
+            }
+            return main_test_fan(val);
+        }
+    }
+    return EXIT_SUCCESS;
+}
+
+static int help_requested(int argc, char* argv[] )
+{
+    if ( argc > 1 )
+    {
+        if ( !strncmp(argv[1], "--help", 7) )
+        {
+            return 1;
+        }
+        if ( !strncmp(argv[1], "-help", 6) )
+        {
+            return 1;
+        }
+        if ( !strncmp(argv[1], "-?", 3) )
+        {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+static void print_usage( void )
+{
+    printf(
+        "\n\
+Usage: clevo-fancontrol [fan-duty-percentage|-1]\n      \
 \n\
 Dump/Control fan duty on Clevo laptops. Display indicator by default.\n\
 \n\
@@ -166,22 +213,6 @@ process.\n\
 \n\
 DO NOT MANIPULATE OR QUERY EC I/O PORTS WHILE THIS PROGRAM IS RUNNING.\n\
 \n");
-            return main_dump_fan();
-        } else {
-            int val = atoi(argv[1]);
-            if (val == -1) {
-                signal_term(&ec_on_sigterm);
-                main_init_share();
-                return main_ec_worker();
-            } else if (val < 0 || val > 100)
-            {
-                printf("invalid fan duty %d!\n", val);
-                return EXIT_FAILURE;
-            }
-            return main_test_fan(val);
-        }
-    }
-    return EXIT_SUCCESS;
 }
 
 static void main_init_share(void) {
